@@ -5,6 +5,7 @@ import { showToast } from '@/store/slices/uiSlice';
 import type { ScryfallCard } from '@/types/card';
 import { DeckList } from '@/components/DeckList/DeckList';
 import { DeckBuilder } from '@/components/DeckBuilder/DeckBuilder';
+import { DeckBrowser } from '@/components/DeckBrowser/DeckBrowser';
 import { CardDetail } from '@/components/CardDetail/CardDetail';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { CardGrid } from '@/components/CardGrid/CardGrid';
@@ -115,13 +116,7 @@ export function DecksPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <span className="text-6xl mb-4">📚</span>
-            <h2 className="text-2xl font-bold mb-2">Select a Deck</h2>
-            <p className="text-muted-foreground max-w-md">
-              Choose a deck from the sidebar to start editing, or create a new deck to get started.
-            </p>
-          </div>
+          <DeckBrowser />
         )}
       </main>
 
