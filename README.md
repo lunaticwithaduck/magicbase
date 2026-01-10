@@ -2,7 +2,7 @@
 
 A modern, backendless Magic: The Gathering card database and deck builder. All your decks are saved locally in your browser.
 
-![MTG Base Screenshot](image.png)
+![MTG Base Screenshot](https://github.com/lunaticwithaduck/magicbase/blob/develop/public/image.png)
 
 ## Features
 
