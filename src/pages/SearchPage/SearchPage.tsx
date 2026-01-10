@@ -12,7 +12,6 @@ import { CardDetail } from '@/components/CardDetail/CardDetail';
 import { DeckBuilder } from '@/components/DeckBuilder/DeckBuilder';
 import { DeckList } from '@/components/DeckList/DeckList';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetContent,
@@ -75,17 +74,19 @@ export function SearchPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)]">
+    <div className="flex h-full overflow-hidden">
       {/* Filters Sidebar */}
-      <aside className="hidden lg:block w-64 border-r border-border p-4 overflow-auto">
-        <h2 className="text-lg font-semibold mb-4">Filters</h2>
-        <SearchFilters />
+      <aside className="hidden lg:flex lg:flex-col w-64 border-r border-border overflow-hidden">
+        <div className="p-4 overflow-y-auto flex-1">
+          <h2 className="text-lg font-semibold mb-4">Filters</h2>
+          <SearchFilters />
+        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {/* Search Header */}
-        <div className="p-4 border-b border-border">
+        <div className="shrink-0 p-4 border-b border-border">
           <div className="flex items-center gap-4">
             <SearchBar className="flex-1" />
             
@@ -121,66 +122,69 @@ export function SearchPage() {
           )}
         </div>
 
-        {/* Cards Grid */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            {!filters.query && !filters.colors?.length && !filters.type && !filters.rarity?.length ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="relative">
-                  <span className="text-7xl mb-4 float">✨</span>
-                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-6xl">🔮</span>
-                </div>
-                <h2 className="text-2xl font-bold mb-2 mt-8 text-gradient">Search for Magic Cards</h2>
-                <p className="text-muted-foreground max-w-md mb-4">
-                  Explore the multiverse! Use the search bar above to find cards. 
-                </p>
-                <div className="bg-secondary/50 rounded-lg p-4 max-w-md">
-                  <p className="text-sm text-muted-foreground mb-2">Try advanced syntax:</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <code className="bg-violet-500/20 text-violet-300 px-2 py-1 rounded text-xs">t:creature</code>
-                    <code className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">c:blue</code>
-                    <code className="bg-orange-500/20 text-orange-300 px-2 py-1 rounded text-xs">r:mythic</code>
-                    <code className="bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs">cmc=3</code>
-                  </div>
+        {/* Cards Grid with Sticky Pagination */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {!filters.query && !filters.colors?.length && !filters.type && !filters.rarity?.length ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-16 text-center px-4 overflow-auto">
+              <div className="relative">
+                <span className="text-7xl mb-4 float">✨</span>
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-6xl">🔮</span>
+              </div>
+              <h2 className="text-2xl font-bold mb-2 mt-8 text-gradient">Search for Magic Cards</h2>
+              <p className="text-muted-foreground max-w-md mb-4">
+                Explore the multiverse! Use the search bar above to find cards. 
+              </p>
+              <div className="bg-secondary/50 rounded-lg p-4 max-w-md">
+                <p className="text-sm text-muted-foreground mb-2">Try advanced syntax:</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <code className="bg-violet-500/20 text-violet-300 px-2 py-1 rounded text-xs">t:creature</code>
+                  <code className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">c:blue</code>
+                  <code className="bg-orange-500/20 text-orange-300 px-2 py-1 rounded text-xs">r:mythic</code>
+                  <code className="bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs">cmc=3</code>
                 </div>
               </div>
-            ) : (
-              <>
+            </div>
+          ) : (
+            <>
+              {/* Scrollable Card Grid */}
+              <div className="flex-1 overflow-y-auto p-4">
                 <CardGrid
                   cards={cards}
                   isLoading={isLoading || isFetching}
                   onCardClick={handleCardClick}
                   onAddToDeck={handleAddToDeck}
                 />
+              </div>
 
-                {/* Pagination */}
-                {cards.length > 0 && (
-                  <div className="flex items-center justify-center gap-4 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={handlePrevPage}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      Page {page}
-                    </span>
-                    <Button
-                      variant="outline"
-                      onClick={handleNextPage}
-                      disabled={!hasMore}
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </ScrollArea>
+              {/* Sticky Pagination - Always visible at bottom */}
+              {(cards.length > 0 || isLoading) && (
+                <div className="shrink-0 flex items-center justify-center gap-4 p-3 border-t border-border bg-background">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrevPage}
+                    disabled={page === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Page {page}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={!hasMore}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       {/* Deck Panel */}

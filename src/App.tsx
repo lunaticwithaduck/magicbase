@@ -8,6 +8,7 @@ import { SearchPage } from '@/pages/SearchPage/SearchPage';
 import { DecksPage } from '@/pages/DecksPage/DecksPage';
 import { SetsPage } from '@/pages/SetsPage/SetsPage';
 import { Toaster } from '@/components/Toast/Toast';
+import { AIChat } from '@/components/AIChat/AIChat';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,14 +34,17 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 function AppContent() {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background">
+      <div className="h-screen overflow-hidden bg-background flex flex-col">
         <Header />
-        <Routes>
-          <Route path="/" element={<SearchPage />} />
-          <Route path="/decks" element={<DecksPage />} />
-          <Route path="/sets" element={<SetsPage />} />
-        </Routes>
+        <div className="flex-1 min-h-0 h-full">
+          <Routes>
+            <Route path="/" element={<SearchPage />} />
+            <Route path="/decks" element={<DecksPage />} />
+            <Route path="/sets" element={<SetsPage />} />
+          </Routes>
+        </div>
         <Toaster />
+        <AIChat />
       </div>
     </ThemeProvider>
   );

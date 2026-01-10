@@ -61,9 +61,9 @@ export function SetsPage() {
 
   if (selectedSet) {
     return (
-      <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+      <div className="flex flex-col h-full overflow-hidden">
         {/* Set Header */}
-        <div className="p-4 border-b border-border">
+        <div className="shrink-0 p-4 border-b border-border">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={handleBackToSets}>
               <ArrowLeft className="h-4 w-4" />
@@ -84,13 +84,14 @@ export function SetsPage() {
         </div>
 
         {/* Set Cards */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            <CardGrid
-              cards={setCards}
-              isLoading={setCardsLoading}
-              onCardClick={handleCardClick}
-            />
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <CardGrid
+                cards={setCards}
+                isLoading={setCardsLoading}
+                onCardClick={handleCardClick}
+              />
 
             {/* Pagination */}
             {setCards.length > 0 && (
@@ -115,7 +116,8 @@ export function SetsPage() {
               </div>
             )}
           </div>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
 
         {/* Card Detail */}
         <CardDetail
@@ -128,9 +130,9 @@ export function SetsPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-border">
+      <div className="shrink-0 p-4 border-b border-border">
         <h1 className="text-2xl font-bold mb-4">Card Sets</h1>
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -144,23 +146,24 @@ export function SetsPage() {
       </div>
 
       {/* Sets List */}
-      <ScrollArea className="flex-1">
-        <div className="p-4">
-          {setsLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : (
-            sortedYears.map((year) => (
-              <div key={year} className="mb-8">
-                <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background py-2 z-10">
-                  {year}
-                </h2>
-                <div className="grid gap-2">
-                  {setsByYear[year].map((set) => (
-                    <motion.button
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-4">
+            {setsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : (
+              sortedYears.map((year) => (
+                <div key={year} className="mb-8">
+                  <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background py-2 z-10">
+                    {year}
+                  </h2>
+                  <div className="grid gap-2">
+                    {setsByYear[year].map((set) => (
+                      <motion.button
                       key={set.id}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
@@ -187,8 +190,9 @@ export function SetsPage() {
               </div>
             ))
           )}
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 }

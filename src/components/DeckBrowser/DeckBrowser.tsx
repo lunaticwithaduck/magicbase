@@ -234,8 +234,9 @@ function CommanderDetail({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-6">
           {/* Commander Image + Stats */}
           <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
             <div>
@@ -334,7 +335,8 @@ function CommanderDetail({
             )}
           </div>
         </div>
-      </ScrollArea>
+        </ScrollArea>
+      </div>
     </div>
   );
 }
@@ -400,9 +402,10 @@ export function DeckBrowser() {
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-4">
-          {error ? (
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-4">
+            {error ? (
             <div className="text-center py-12">
               <p className="text-destructive">Failed to load commanders. Please try again.</p>
             </div>
@@ -436,7 +439,8 @@ export function DeckBrowser() {
             </motion.div>
           )}
         </div>
-      </ScrollArea>
+        </ScrollArea>
+      </div>
     </div>
   );
 }

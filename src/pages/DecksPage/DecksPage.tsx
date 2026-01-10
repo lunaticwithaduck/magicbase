@@ -53,14 +53,14 @@ export function DecksPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)]">
+    <div className="flex h-full overflow-hidden">
       {/* Deck List Sidebar */}
-      <aside className="w-72 border-r border-border">
+      <aside className="w-72 border-r border-border overflow-hidden flex flex-col">
         <DeckList />
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {activeDeck ? (
           <>
             {/* Header */}
@@ -84,9 +84,9 @@ export function DecksPage() {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 flex min-h-0">
+            <div className="flex-1 flex min-h-0 overflow-hidden">
               {/* Search Results */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <ScrollArea className="h-full">
                   <div className="p-4">
                     {searchQuery ? (
@@ -110,7 +110,7 @@ export function DecksPage() {
               </div>
 
               {/* Deck Builder Panel */}
-              <aside className="w-80 border-l border-border">
+              <aside className="w-80 border-l border-border overflow-hidden">
                 <DeckBuilder deck={activeDeck} onCardClick={handleCardClick} />
               </aside>
             </div>

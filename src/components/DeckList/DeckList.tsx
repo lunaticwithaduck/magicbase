@@ -86,18 +86,19 @@ export function DeckList({ onDeckSelect }: DeckListProps) {
         </Button>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          <AnimatePresence>
-            {decks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No decks yet</p>
-                <p className="text-sm">Create your first deck to get started</p>
-              </div>
-            ) : (
-              decks.map((deck) => {
-                const cardCount = deck.cards.reduce((sum, c) => sum + c.quantity, 0);
-                const isActive = deck.id === activeDeckId;
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="p-2">
+            <AnimatePresence>
+              {decks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No decks yet</p>
+                  <p className="text-sm">Create your first deck to get started</p>
+                </div>
+              ) : (
+                decks.map((deck) => {
+                  const cardCount = deck.cards.reduce((sum, c) => sum + c.quantity, 0);
+                  const isActive = deck.id === activeDeckId;
 
                 return (
                   <motion.div
@@ -166,9 +167,10 @@ export function DeckList({ onDeckSelect }: DeckListProps) {
                 );
               })
             )}
-          </AnimatePresence>
-        </div>
-      </ScrollArea>
+            </AnimatePresence>
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Create Deck Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
