@@ -14,6 +14,7 @@ interface CardImageProps {
   onClick?: () => void;
   onAddToDeck?: (card: ScryfallCard) => void;
   className?: string;
+  enableTilt?: boolean;
 }
 
 const sizeClasses = {
@@ -54,14 +55,18 @@ export function CardImage({
   onClick,
   onAddToDeck,
   className,
+  enableTilt = true,
 }: CardImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [currentFace, setCurrentFace] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
   const imageUrl = getImageUrl(card, size, currentFace);
   const isDoubleFaced = hasMultipleFaces(card);
   const cardmarketUrl = card.purchase_uris?.cardmarket;
+  const isRareOrMythic = card.rarity === 'rare' || card.rarity === 'mythic';
 
   const handleLoad = useCallback(() => {
     setIsLoading(false);
@@ -76,6 +81,26 @@ export function CardImage({
     e.stopPropagation();
     setCurrentFace((prev) => (prev === 0 ? 1 : 0));
     setIsLoading(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!enableTilt) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({
+      x: (y - 0.5) * 20,
+      y: (x - 0.5) * -20,
+    });
+  }, [enableTilt]);
+
+  const handleMouseLeave = useCallback(() => {
+    setTilt({ x: 0, y: 0 });
+    setIsHovered(false);
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
   }, []);
 
   const handleAddToDeck = useCallback((e: React.MouseEvent) => {
@@ -93,15 +118,51 @@ export function CardImage({
   return (
     <motion.div
       className={cn(
-        'relative aspect-[488/680] rounded-[4.75%/3.5%] overflow-hidden bg-muted shadow-md cursor-pointer group',
+        'relative aspect-[488/680] rounded-[4.75%/3.5%] overflow-hidden bg-muted cursor-pointer group',
         sizeClasses[size],
         className
       )}
+      style={{
+        transformStyle: 'preserve-3d',
+        transform: enableTilt ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : undefined,
+        transition: 'transform 0.1s ease-out',
+      }}
       onClick={onClick}
-      whileHover={{ scale: 1.02, y: -4 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2 }}
     >
+      {/* Holographic shine effect for rare/mythic cards */}
+      {isRareOrMythic && isHovered && (
+        <div 
+          className="absolute inset-0 z-30 pointer-events-none opacity-40"
+          style={{
+            background: `linear-gradient(
+              ${105 + tilt.y * 2}deg,
+              transparent 20%,
+              rgba(255, 255, 255, 0.3) 45%,
+              rgba(255, 200, 100, 0.2) 50%,
+              rgba(100, 200, 255, 0.2) 55%,
+              rgba(255, 100, 200, 0.2) 60%,
+              transparent 80%
+            )`,
+            mixBlendMode: 'overlay',
+          }}
+        />
+      )}
+
+      {/* Card glow effect */}
+      <div 
+        className={cn(
+          "absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-md",
+          card.rarity === 'mythic' && "bg-gradient-to-r from-orange-500 via-red-500 to-orange-500",
+          card.rarity === 'rare' && "bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400",
+          card.rarity === 'uncommon' && "bg-gradient-to-r from-slate-400 to-slate-300",
+          card.rarity === 'common' && "bg-slate-500/30",
+        )}
+      />
+
       {isDoubleFaced && (
         <button
           onClick={handleFlip}

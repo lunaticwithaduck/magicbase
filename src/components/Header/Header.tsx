@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Menu, Search, Library, Layers, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,8 +19,22 @@ export function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-gradient-to-r from-background via-background to-background backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-      {/* Decorative gradient line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 opacity-80" />
+      {/* Animated gradient line */}
+      <motion.div 
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{
+          background: 'linear-gradient(90deg, #8b5cf6, #d946ef, #f97316, #8b5cf6)',
+          backgroundSize: '200% 100%',
+        }}
+        animate={{
+          backgroundPosition: ['0% 0%', '200% 0%'],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+      />
       
       <div className="container flex h-14 items-center px-4">
         <Button
@@ -32,11 +47,28 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Button>
 
         <Link to="/" className="flex items-center gap-2 mr-6 group">
-          <div className="relative">
-            <span className="text-2xl group-hover:scale-110 transition-transform inline-block">🃏</span>
-            <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-          <span className="font-bold text-lg hidden sm:inline bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+          <motion.div 
+            className="relative"
+            whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+            transition={{ duration: 0.4 }}
+          >
+            <span className="text-2xl inline-block">🃏</span>
+            <motion.div
+              className="absolute -top-1 -right-1"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <Sparkles className="w-3 h-3 text-amber-400" />
+            </motion.div>
+          </motion.div>
+          <span className="font-bold text-lg hidden sm:inline bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient_3s_linear_infinite]">
             MTG Base
           </span>
         </Link>
@@ -57,7 +89,10 @@ export function Header({ onMenuClick }: HeaderProps) {
                 )} />
                 {label}
                 {location.pathname === path && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full" />
+                  <motion.span 
+                    layoutId="nav-indicator"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
+                  />
                 )}
               </Button>
             </Link>

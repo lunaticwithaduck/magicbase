@@ -10,6 +10,8 @@ A modern, backendless Magic: The Gathering card database and deck builder. All y
 - 🃏 **Deck Builder** - Create and manage decks for various formats (Commander, Standard, Modern, etc.)
 - 📚 **Set Browser** - Browse cards by expansion set
 - 👑 **Commander Browser** - Explore top commanders and sample decklists via EDHREC integration
+- 👑 **AI Assistant** - Get some fresh ideas from Grok when building your deck
+
 
 ## Tech Stack
 

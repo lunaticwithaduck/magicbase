@@ -192,6 +192,19 @@
     }
   }
   
+  /* Gradient text animation */
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
   /* Subtle float animation */
   .float {
     animation: float 3s ease-in-out infinite;
@@ -203,6 +216,36 @@
     }
     50% {
       transform: translateY(-6px);
+    }
+  }
+  
+  /* Pulse glow animation */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    }
+    50% {
+      box-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+    }
+  }
+
+  /* Card shine effect */
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(100%) rotate(45deg);
+    }
+  }
+  
+  /* Shimmer effect for skeletons */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
     }
   }
 }
