@@ -1,3 +1,4 @@
+import { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useGetCardSynergiesQuery, selectHighSynergyCards, type EDHRECSynergyCard } from '@/api/edhrecApi';
 import { useLazyGetCardByNameQuery } from '@/api/scryfallApi';
@@ -5,8 +6,21 @@ import type { ScryfallCard } from '@/types/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sparkles, ExternalLink, AlertCircle } from 'lucide-react';
+import { Sparkles, ExternalLink, AlertCircle, RefreshCw, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAppDispatch, useAppSelector } from '@/store/store';
+import { addCardToDeck } from '@/store/slices/decksSlice';
+import { showToast } from '@/store/slices/uiSlice';
+
+// Fisher-Yates shuffle
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface CardSynergiesProps {
   cardName: string;
@@ -34,6 +48,8 @@ function SynergyCard({
   card: EDHRECSynergyCard; 
   onCardClick?: (card: ScryfallCard) => void;
 }) {
+  const dispatch = useAppDispatch();
+  const { activeDeckId } = useAppSelector((state) => state.decks);
   const [fetchCard, { isLoading }] = useLazyGetCardByNameQuery();
 
   const handleClick = async () => {
@@ -48,6 +64,27 @@ function SynergyCard({
         onCardClick(fuzzyResult);
       } catch {
         console.error('Could not fetch card:', card.name);
+      }
+    }
+  };
+
+  const handleAddToDeck = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!activeDeckId) {
+      dispatch(showToast({ message: 'Please select a deck first', type: 'error' }));
+      return;
+    }
+    try {
+      const result = await fetchCard({ name: card.name, exact: true }).unwrap();
+      dispatch(addCardToDeck({ deckId: activeDeckId, card: result }));
+      dispatch(showToast({ message: `Added ${card.name} to deck`, type: 'success' }));
+    } catch {
+      try {
+        const fuzzyResult = await fetchCard({ name: card.name, exact: false }).unwrap();
+        dispatch(addCardToDeck({ deckId: activeDeckId, card: fuzzyResult }));
+        dispatch(showToast({ message: `Added ${card.name} to deck`, type: 'success' }));
+      } catch {
+        dispatch(showToast({ message: `Could not add ${card.name}`, type: 'error' }));
       }
     }
   };
@@ -95,8 +132,21 @@ function SynergyCard({
           </Badge>
         )}
 
-        {/* Hover overlay with name */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+        {/* Hover overlay with name and add button */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-1.5">
+          {/* Add to deck button */}
+          <div className="flex justify-end">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-6 w-6 bg-primary/90 hover:bg-primary text-primary-foreground"
+              onClick={handleAddToDeck}
+              title="Add to deck"
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+          {/* Card name */}
           <span className="text-white text-[10px] font-medium truncate w-full">
             {card.name}
           </span>
@@ -107,14 +157,24 @@ function SynergyCard({
 }
 
 export function CardSynergies({ cardName, onCardClick, className }: CardSynergiesProps) {
-  const { data, isLoading, isError } = useGetCardSynergiesQuery(cardName, {
+  const [shuffleKey, setShuffleKey] = useState(0);
+  const { data, isLoading, isError, isFetching } = useGetCardSynergiesQuery(cardName, {
     skip: !cardName,
   });
   
-  const allSynergyCards = selectHighSynergyCards(data);
+  // Get more cards from the pool (up to 30) to enable shuffling
+  const allSynergyCards = selectHighSynergyCards(data, 30);
   
-  // Show all cards, let SynergyCard handle the visual filtering
-  const synergyCards = allSynergyCards;
+  // Shuffle and take 12 cards when shuffleKey changes
+  const synergyCards = useMemo(() => {
+    if (allSynergyCards.length <= 12) return allSynergyCards;
+    return shuffleArray(allSynergyCards).slice(0, 12);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSynergyCards, shuffleKey]);
+
+  const handleRefresh = useCallback(() => {
+    setShuffleKey(prev => prev + 1);
+  }, []);
 
   if (isLoading) {
     return (
@@ -179,21 +239,34 @@ export function CardSynergies({ cardName, onCardClick, className }: CardSynergie
             via EDHREC
           </Badge>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 text-xs text-muted-foreground hover:text-primary"
-          onClick={() => {
-            const sanitized = cardName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
-            window.open(`https://edhrec.com/cards/${sanitized}`, '_blank');
-          }}
-        >
-          <ExternalLink className="w-3 h-3 mr-1" />
-          View on EDHREC
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-muted-foreground hover:text-primary"
+            onClick={handleRefresh}
+            disabled={isFetching}
+            title="Shuffle synergies"
+          >
+            <RefreshCw className={cn("w-3 h-3", isFetching && "animate-spin")} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 text-xs text-muted-foreground hover:text-primary"
+            onClick={() => {
+              const sanitized = cardName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+              window.open(`https://edhrec.com/cards/${sanitized}`, '_blank');
+            }}
+          >
+            <ExternalLink className="w-3 h-3 mr-1" />
+            View on EDHREC
+          </Button>
+        </div>
       </div>
 
       <motion.div 
+        key={shuffleKey}
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
         variants={container}
         initial="hidden"

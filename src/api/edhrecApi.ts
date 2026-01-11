@@ -310,45 +310,64 @@ export const {
 } = edhrecDeckApi;
 
 // Selector helpers - now using correct path
-export const selectHighSynergyCards = (data?: EDHRECCardData): EDHRECSynergyCard[] => {
+export const selectHighSynergyCards = (data?: EDHRECCardData, limit = 12): EDHRECSynergyCard[] => {
   const cardlists = data?.container?.json_dict?.cardlists;
   if (!cardlists) return [];
+  
+  // Collect all synergy cards from multiple sources
+  const allCards: EDHRECSynergyCard[] = [];
   
   // Priority order: highsynergycards > topcards > gamechangers > similar
   const highSynergyList = cardlists.find((list) => list.tag === 'highsynergycards');
   if (highSynergyList && highSynergyList.cardviews.length > 0) {
-    return highSynergyList.cardviews.slice(0, 12);
+    allCards.push(...highSynergyList.cardviews);
   }
   
   const topCardsList = cardlists.find((list) => list.tag === 'topcards');
   if (topCardsList && topCardsList.cardviews.length > 0) {
-    // Sort by synergy score (higher is better) and take top 12
-    return [...topCardsList.cardviews]
-      .sort((a, b) => (b.synergy ?? 0) - (a.synergy ?? 0))
-      .slice(0, 12);
+    // Add cards not already in allCards
+    topCardsList.cardviews.forEach(card => {
+      if (!allCards.some(c => c.name === card.name)) {
+        allCards.push(card);
+      }
+    });
   }
   
   const gameChangersList = cardlists.find((list) => list.tag === 'gamechangers');
   if (gameChangersList && gameChangersList.cardviews.length > 0) {
-    return gameChangersList.cardviews.slice(0, 12);
+    gameChangersList.cardviews.forEach(card => {
+      if (!allCards.some(c => c.name === card.name)) {
+        allCards.push(card);
+      }
+    });
   }
   
   // Fallback: try similar cards from top level
   if (data?.similar && data.similar.length > 0) {
-    return data.similar.slice(0, 12).map(card => ({
-      ...card,
-      image: getScryfallImageUrl(card.name),
-    }));
+    data.similar.forEach(card => {
+      if (!allCards.some(c => c.name === card.name)) {
+        allCards.push({
+          ...card,
+          image: getScryfallImageUrl(card.name),
+        });
+      }
+    });
   }
   
   // Last fallback: get cards from any available list (except commanders)
-  for (const list of cardlists) {
-    if (list.cardviews.length > 0 && !list.tag.includes('commander')) {
-      return list.cardviews.slice(0, 12);
+  if (allCards.length === 0) {
+    for (const list of cardlists) {
+      if (list.cardviews.length > 0 && !list.tag.includes('commander')) {
+        allCards.push(...list.cardviews);
+        break;
+      }
     }
   }
   
-  return [];
+  // Sort by synergy score (higher is better) and apply limit
+  return [...allCards]
+    .sort((a, b) => (b.synergy ?? 0) - (a.synergy ?? 0))
+    .slice(0, limit);
 };
 
 export const selectTopCommanders = (data?: EDHRECCardData): EDHRECSynergyCard[] => {

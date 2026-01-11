@@ -345,7 +345,7 @@ export function AIChat({ deckContext: propDeckContext }: AIChatProps) {
           </SheetHeader>
 
           {/* Chat Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <ScrollArea className="h-100 min-h-180 p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {/* Welcome message */}
               {messages.length === 0 && !streamingContent && (

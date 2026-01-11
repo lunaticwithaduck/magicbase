@@ -322,20 +322,17 @@ export function CardDetail({ card, open, onOpenChange, onAddToDeck }: CardDetail
               </motion.div>
             </div>
 
-            {/* Synergies & Commander Decks - Only show on initial card (no back button) */}
-            {cardHistory.length === 0 && (
-              <>
-                <Separator className="my-6" />
-                <CardSynergies 
-                  cardName={displayCard.name} 
-                  onCardClick={handleSynergyCardClick}
-                />
+            {/* Synergies & Commander Decks - Always show */}
+            <Separator className="my-6" />
+            <CardSynergies 
+              key={displayCard.id}
+              cardName={displayCard.name} 
+              onCardClick={handleSynergyCardClick}
+            />
 
-                {/* Commander Decks Section - Only for legendary creatures */}
-                <Separator className="my-6" />
-                <CommanderDecks card={displayCard} />
-              </>
-            )}
+            {/* Commander Decks Section - Only for legendary creatures */}
+            <Separator className="my-6" />
+            <CommanderDecks key={`decks-${displayCard.id}`} card={displayCard} />
           </div>
         </ScrollArea>
       </DialogContent>
